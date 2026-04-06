@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronađi knjigu - Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body {margin:0;font-family:'Roboto',sans-serif;background-color:#d4edda;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+.container {background:white;border-radius:15px;padding:40px 30px;box-shadow:0 10px 20px rgba(0,0,0,0.2);width:100%;max-width:500px;text-align:center;position:relative;}
+h1 {font-family:'Pacifico',cursive;font-size:3em;margin-bottom:20px;color:#155724;transform:rotate(-2deg);}
+button {display:block;width:80%;max-width:300px;margin:10px auto;padding:12px;font-size:1em;font-weight:bold;border:none;border-radius:10px;cursor:pointer;transition:.3s;background-color:#28a745;color:white;}
+button:hover{background-color:#218838;}
+.question{margin-top:20px;opacity:0;transition:opacity .5s;display:none;}
+.question.show{display:block;opacity:1;}
+.book-title{font-weight:bold;font-size:1.2em;margin-top:10px;}
+.book-desc{margin-top:5px;font-style:italic;color:#555;}
+.book-cover{margin-top:10px;width:120px;height:auto;}
+</style>
+</head>
+<body>
+<div class="container" id="quiz-container">
+<h1>Pronađi knjigu</h1>
+<button id="start-btn">Započni</button>
+
+<div id="genre-question" class="question">
+<p>Koji žanr želiš čitati?</p>
+<button onclick="selectAnswer('genre','fantasy')">Fantastika</button>
+<button onclick="selectAnswer('genre','mystery')">Misterija</button>
+<button onclick="selectAnswer('genre','romance')">Romansa</button>
+<button onclick="selectAnswer('genre','non-fiction')">Non-fiction</button>
+</div>
+
+<div id="age-question" class="question">
+<p>Koliko imaš godina?</p>
+<button onclick="selectAnswer('age','10-15')">10-15</button>
+<button onclick="selectAnswer('age','15-18')">15-18</button>
+<button onclick="selectAnswer('age','18-25')">18-25</button>
+<button onclick="selectAnswer('age','25-35')">25-35</button>
+<button onclick="selectAnswer('age','35+')">35+</button>
+</div>
+
+<div id="result" class="question"></div>
+<button id="another-btn" class="question">Preporuči drugu knjigu</button>
+</div>
+
+<script>
+let books=[];
+fetch('books.json').then(res=>res.json()).then(data=>books=data);
+
+const startBtn=document.getElementById('start-btn');
+const genreQuestion=document.getElementById('genre-question');
+const ageQuestion=document.getElementById('age-question');
+const resultDiv=document.getElementById('result');
+const anotherBtn=document.getElementById('another-btn');
+
+let answers={};
+let step=0;
+
+startBtn.addEventListener('click',()=>{
+startBtn.style.display='none';
+genreQuestion.classList.add('show');
+step=1;
+});
+
+function selectAnswer(type,value){
+answers[type]=value;
+if(step===1){genreQuestion.classList.remove('show'); ageQuestion.classList.add('show'); step=2;}
+else if(step===2){ageQuestion.classList.remove('show'); showRecommendation(); }
+}
+
+function ageStringToRange(ageStr){
+if(ageStr==='10-15') return [10,15];
+if(ageStr==='15-18') return [15,18];
+if(ageStr==='18-25') return [18,25];
+if(ageStr==='25-35') return [25,35];
+if(ageStr==='35+') return [35,100];
+}
+
+function showRecommendation(){
+const [minAge,maxAge]=ageStringToRange(answers.age);
+const filtered=books.filter(b=>b.genre===answers.genre && b.minAge<=maxAge && b.maxAge>=minAge);
+if(filtered.length===0){resultDiv.innerHTML='<h2>Nažalost, nema knjige za ovu kombinaciju 😅</h2>';}
+else{
+const randIndex=Math.floor(Math.random()*filtered.length);
+const b=filtered[randIndex];
+resultDiv.innerHTML=`<h2>Preporučena knjiga:</h2>
+<div class="book-title">${b.title}</div>
+<div class="book-desc">${b.desc}</div>
+<img class="book-cover" src="${b.cover}" alt="cover">
+<div>Ocjena: ${b.rating}</div>
+<div><a href="${b.link}" target="_blank">Više info / kupi</a></div>`;
+}
+resultDiv.classList.add('show');
+anotherBtn.classList.add('show');
+}
+
+anotherBtn.addEventListener('click',()=>{showRecommendation();});
+</script>
+</body>
+</html>
