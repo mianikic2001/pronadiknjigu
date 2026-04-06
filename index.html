@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pronađi knjigu</title>
+
+<!-- Google font -->
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+margin: 0;
+font-family: 'Roboto', sans-serif;
+background-color: #d4edda; /* svijetlo zelena */
+display: flex;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+}
+
+.container {
+background-color: white;
+border-radius: 15px;
+padding: 40px 30px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+width: 100%;
+max-width: 500px;
+text-align: center;
+position: relative;
+}
+
+h1 {
+font-family: 'Pacifico', cursive;
+font-size: 3em;
+margin-bottom: 20px;
+color: #155724;
+transform: rotate(-2deg);
+}
+
+button {
+display: block;
+width: 80%;
+max-width: 300px;
+margin: 10px auto;
+padding: 12px;
+font-size: 1em;
+font-weight: bold;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+transition: 0.3s;
+background-color: #28a745;
+color: white;
+}
+
+button:hover {
+background-color: #218838;
+}
+
+.question {
+margin-top: 20px;
+opacity: 0;
+transition: opacity 0.5s ease-in-out;
+display: none;
+}
+
+.question.show {
+display: block;
+opacity: 1;
+}
+
+.book-title {
+font-weight: bold;
+font-size: 1.2em;
+margin-top: 10px;
+}
+
+.book-desc {
+margin-top: 5px;
+font-style: italic;
+color: #555;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container" id="quiz-container">
+<h1>Pronađi knjigu</h1>
+<button id="start-btn">Započni</button>
+
+<!-- Pitanja -->
+<div id="age-question" class="question">
+<p>Koliko imaš godina?</p>
+<button onclick="selectAnswer('age', '10-15')">10-15</button>
+<button onclick="selectAnswer('age', '15-18')">15-18</button>
+<button onclick="selectAnswer('age', '18-25')">18-25</button>
+<button onclick="selectAnswer('age', '25-35')">25-35</button>
+<button onclick="selectAnswer('age', '35+')">35+</button>
+</div>
+
+<div id="genre-question" class="question">
+<p>Koji žanr želiš čitati?</p>
+<button onclick="selectAnswer('genre', 'fantastika')">Fantastika</button>
+<button onclick="selectAnswer('genre', 'misterija')">Misterija</button>
+<button onclick="selectAnswer('genre', 'romansa')">Romansa</button>
+<button onclick="selectAnswer('genre', 'istorija')">Povijest</button>
+<button onclick="selectAnswer('genre', 'znanstvena fantastika')">Znanstvena fantastika</button>
+<button onclick="selectAnswer('genre', 'psihologija')">Psihologija</button>
+</div>
+
+<div id="difficulty-question" class="question">
+<p>Koliko ti je izazovna knjiga?</p>
+<button onclick="selectAnswer('difficulty', 'lagana')">Lagana i zabavna</button>
+<button onclick="selectAnswer('difficulty', 'srednja')">Srednje teška</button>
+<button onclick="selectAnswer('difficulty', 'zahtjevna')">Zahtjevna / ozbiljna</button>
+</div>
+
+<div id="length-question" class="question">
+<p>Koliko dugo želiš čitati knjigu?</p>
+<button onclick="selectAnswer('length', 'kratka')">Kratka (do 200 str.)</button>
+<button onclick="selectAnswer('length', 'srednja')">Srednja (200-400 str.)</button>
+<button onclick="selectAnswer('length', 'duga')">Duga (400+ str.)</button>
+</div>
+
+<!-- Rezultat -->
+<div id="result" class="question"></div>
+<button id="another-btn" class="question">Preporuči drugu knjigu</button>
+</div>
+
+<script>
+const startBtn = document.getElementById('start-btn');
+const questions = ['age', 'genre', 'difficulty', 'length'];
+let currentQuestionIndex = 0;
+let answers = {};
+
+const ageQuestion = document.getElementById('age-question');
+const genreQuestion = document.getElementById('genre-question');
+const difficultyQuestion = document.getElementById('difficulty-question');
+const lengthQuestion = document.getElementById('length-question');
+const resultDiv = document.getElementById('result');
+const anotherBtn = document.getElementById('another-btn');
+
+const questionDivs = {
+'age': ageQuestion,
+'genre': genreQuestion,
+'difficulty': difficultyQuestion,
+'length': lengthQuestion
+};
+
+startBtn.addEventListener('click', () => {
+startBtn.style.display = 'none';
+showQuestion('age');
+});
+
+function showQuestion(qKey) {
+for (let key in questionDivs) {
+questionDivs[key].classList.remove('show');
+}
+questionDivs[qKey].classList.add('show');
+}
+
+function selectAnswer(type, value) {
+answers[type] = value;
+currentQuestionIndex++;
+if(currentQuestionIndex < questions.length) {
+showQuestion(questions[currentQuestionIndex]);
+} else {
+showRecommendation();
+}
+}
+
+const books = {
+'fantastika': [
+{title:'Harry Potter i Kamen mudraca', desc:'Fantastična avantura za mlade čitatelje.'},
+{title:'Gospodar prstenova', desc:'Epohalni fantastični klasik za sve uzraste.'},
+{title:'Percy Jackson i Olimpijci', desc:'Mlada avantura s grčkim mitovima.'},
+{title:'Narnia', desc:'Fantastični svijet prepun čuda.'},
+{title:'Eragon', desc:'Priča o mladom zmajevom jahaču.'}
+],
+'misterija': [
+{title:'Sherlock Holmes', desc:'Klasik misterije i logike.'},
+{title:'Enola Holmes', desc:'Misterij kroz oči mlade detektivke.'},
+{title:'Deseti čovjek', desc:'Napeta kriminalistička priča.'},
+{title:'Zločin i kazna', desc:'Klasična misterija sa psihološkim dubljinama.'},
+{title:'And Then There Were None', desc:'Napeta i nepredvidiva misterija.'}
+],
+'romansa': [
+{title:'Ponos i predrasude', desc:'Klasik ljubavne literature.'},
+{title:'Dnevnik jedne princeze', desc:'Lagani i zabavni romantični roman.'},
+{title:'Romeo i Julija', desc:'Tragična ljubavna priča.'},
+{title:'Ljubav u doba kolere', desc:'Romantična priča za odrasle.'},
+{title:'Before We Were Strangers', desc:'Moderna ljubavna priča.'}
+],
+'istorija': [
+{title:'Sapiens', desc:'Kratka povijest čovječanstva.'},
+{title:'Priče iz prošlosti', desc:'Zanimljive povijesne priče.'},
+{title:'Guns, Germs, and Steel', desc:'Analiza razvoja civilizacija.'},
+{title:'Povijest svijeta u 100 predmeta', desc:'Kreativan prikaz povijesti.'},
+{title:'The Silk Roads', desc:'Povijest trgovinskih putova.'}
+],
+'znanstvena fantastika': [
+{title:'Dina', desc:'Kultni SF roman o moći i pustinji.'},
+{title:'Neuromancer', desc:'Klasik cyberpunk literature.'},
+{title:'Enderova igra', desc:'Mladi genij spašava svemir.'},
+{title:'Foundation', desc:'Epohalni SF klasik.'},
+{title:'Snow Crash', desc:'Futuristički i zabavan SF roman.'}
+],
+'psihologija': [
+{title:'Kako steći prijatelje i utjecati na ljude', desc:'Klasična psihologija komunikacije.'},
+{title:'Emocionalna inteligencija', desc:'Kako bolje razumjeti sebe i druge.'},
+{title:'Thinking, Fast and Slow', desc:'Duboka analiza ljudskog razmišljanja.'},
+{title:'Flow', desc:'Kako postići stanje potpunog uživanja u aktivnosti.'},
+{title:'Mindset', desc:'Razvijanje rasta i pozitivnog razmišljanja.'}
+]
+};
+
+function showRecommendation() {
+const genreBooks = books[answers.genre];
+const randomIndex = Math.floor(Math.random() * genreBooks.length);
+const book = genreBooks[randomIndex];
+resultDiv.innerHTML = `<h2>Preporučena knjiga za tebe:</h2>
+<div class="book-title">${book.title}</div>
+<div class="book-desc">${book.desc}</div>`;
+resultDiv.classList.add('show');
+anotherBtn.classList.add('show');
+}
+
+anotherBtn.addEventListener('click', () => {
+showRecommendation();
+});
+
+</script>
+
+</body>
+</html>
