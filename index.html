@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Pronadji iducu knjigu</title>
+
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+margin: 0;
+font-family: 'Fredoka', sans-serif;
+background: #bff5e3;
+text-align: center;
+color: #333;
+}
+
+/* Naslov */
+h1 {
+font-size: 3rem;
+margin-top: 100px;
+animation: fadeIn 1s ease;
+}
+
+/* Gumb */
+button {
+padding: 15px 40px;
+font-size: 1.5rem;
+border: none;
+border-radius: 30px;
+background: #4cd3a6;
+color: white;
+cursor: pointer;
+margin-top: 20px;
+transition: 0.3s;
+}
+
+button:hover {
+transform: scale(1.1);
+background: #39b893;
+}
+
+/* Pitanja */
+#quiz {
+display: none;
+margin-top: 50px;
+}
+
+.option {
+display: block;
+margin: 10px auto;
+}
+
+/* Rezultat */
+#result {
+display: none;
+margin-top: 40px;
+}
+
+img {
+max-width: 200px;
+border-radius: 10px;
+}
+
+/* Animacija */
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px);}
+to { opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<h1>📚 Pronadji iducu knjigu</h1>
+<button onclick="startQuiz()">Započni</button>
+
+<div id="quiz"></div>
+<div id="result"></div>
+
+<script>
+let books = [];
+let selected = {};
+
+fetch('books.json?v=1')
+.then(res => res.json())
+.then(data => books = data);
+
+function startQuiz() {
+document.querySelector("button").style.display = "none";
+showAge();
+}
+
+function showAge() {
+let quiz = document.getElementById("quiz");
+quiz.style.display = "block";
+quiz.innerHTML = "<h2>Koliko imaš godina?</h2>";
+
+["10-15","15-18","18-25","25-35","35+"].forEach(age => {
+let btn = document.createElement("button");
+btn.innerText = age;
+btn.className = "option";
+btn.onclick = () => {
+selected.age = age;
+showGenre();
+};
+quiz.appendChild(btn);
+});
+}
+
+function showGenre() {
+let quiz = document.getElementById("quiz");
+quiz.innerHTML = "<h2>Odaberi žanr</h2>";
+
+["fantasy","romance","psychology","non-fiction","sci-fi","mystery"].forEach(g => {
+let btn = document.createElement("button");
+btn.innerText = g;
+btn.className = "option";
+btn.onclick = () => {
+selected.genre = g;
+showDifficulty();
+};
+quiz.appendChild(btn);
+});
+}
+
+function showDifficulty() {
+let quiz = document.getElementById("quiz");
+quiz.innerHTML = "<h2>Težina knjige?</h2>";
+
+["easy","medium","hard"].forEach(d => {
+let btn = document.createElement("button");
+btn.innerText = d;
+btn.className = "option";
+btn.onclick = () => {
+selected.difficulty = d;
+showLength();
+};
+quiz.appendChild(btn);
+});
+}
+
+function showLength() {
+let quiz = document.getElementById("quiz");
+quiz.innerHTML = "<h2>Duljina knjige?</h2>";
+
+["short","medium","long"].forEach(l => {
+let btn = document.createElement("button");
+btn.innerText = l;
+btn.className = "option";
+btn.onclick = () => {
+selected.length = l;
+showResult();
+};
+quiz.appendChild(btn);
+});
+}
+
+function showResult() {
+let quiz = document.getElementById("quiz");
+quiz.style.display = "none";
+
+let ageNum = parseInt(selected.age);
+
+let filtered = books.filter(b =>
+b.genre.toLowerCase() === selected.genre &&
+b.difficulty === selected.difficulty &&
+b.length === selected.length &&
+ageNum >= b.minAge &&
+ageNum <= b.maxAge
+);
+
+// fallback ako nema rezultata
+if (filtered.length === 0) {
+filtered = books.filter(b => b.genre.toLowerCase() === selected.genre);
+}
+
+let book = filtered[Math.floor(Math.random() * filtered.length)];
+
+let result = document.getElementById("result");
+result.style.display = "block";
+
+result.innerHTML = `
+<h2>${book.title}</h2>
+<p>${book.author}</p>
+<img src="${book.cover}">
+<p>⭐ ${book.rating}</p>
+<br>
+<a href="${book.link}" target="_blank">
+<button>Saznaj više</button>
+</a>
+<br><br>
+<button onclick="showResult()">Preporuči drugu knjigu</button>
+`;
+}
+</script>
+
+</body>
+</html>
